@@ -89,6 +89,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
             LOGGER.debug("WAITING for session, current timeout: {} ms ", currentTimeout);
             try {
                 Thread.sleep(timeoutIncrement);
+                waitedTime += timeoutIncrement;
                 currentTimeout += timeoutIncrement;
             } catch (final InterruptedException e) {
                 LOGGER.debug("Aborted wait: {}", e.getMessage());
