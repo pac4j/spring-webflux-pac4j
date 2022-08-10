@@ -28,7 +28,8 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     private int timeoutIncrement = 5;
 
-    private long waitedTime = 0;
+    private static long nbCalls = 0;
+    private static long waitedTime = 0;
 
     public SpringWebfluxSessionStore(final ServerWebExchange exchange) {
         exchange.getSession().subscribe(
@@ -84,6 +85,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
     }
 
     protected void waitForSession() {
+        nbCalls ++;
         int currentTimeout = 0;
         while (session == null && currentTimeout <= timeout) {
             LOGGER.debug("WAITING for session, current timeout: {} ms ", currentTimeout);
@@ -99,22 +101,22 @@ public class SpringWebfluxSessionStore implements SessionStore {
     }
 
     @Override
-    public boolean destroySession(WebContext context) {
+    public boolean destroySession(final WebContext context) {
         return false;
     }
 
     @Override
-    public Optional<Object> getTrackableSession(WebContext context) {
+    public Optional<Object> getTrackableSession(final WebContext context) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<SessionStore> buildFromTrackableSession(WebContext context, Object trackableSession) {
+    public Optional<SessionStore> buildFromTrackableSession(final WebContext context, final Object trackableSession) {
         return Optional.empty();
     }
 
     @Override
-    public boolean renewSession(WebContext context) {
+    public boolean renewSession(final WebContext context) {
         return false;
     }
 
@@ -137,6 +139,6 @@ public class SpringWebfluxSessionStore implements SessionStore {
     @Override
     public String toString() {
         return CommonHelper.toNiceString(this.getClass(), "timeout", timeout, "timeoutIncrement", timeoutIncrement,
-                "waitedTime", waitedTime);
+                "nbCalls", nbCalls, "waitedTime", waitedTime);
     }
 }
