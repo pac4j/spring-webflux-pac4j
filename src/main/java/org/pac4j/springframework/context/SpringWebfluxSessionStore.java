@@ -28,7 +28,9 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     private int timeoutIncrement = 5;
 
-    private static long nbCalls = 0;
+    private static long nbWaitCalls = 0;
+    private static long nbWaitInterruptions = 0;
+    private static long nbWaitErrors = 0;
     private static long waitedTime = 0;
 
     public SpringWebfluxSessionStore(final ServerWebExchange exchange) {
@@ -85,7 +87,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
     }
 
     protected void waitForSession() {
-        nbCalls ++;
+        nbWaitCalls++;
         int currentTimeout = 0;
         while (session == null && currentTimeout <= timeout) {
             LOGGER.debug("WAITING for session, current timeout: {} ms ", currentTimeout);
@@ -95,8 +97,12 @@ public class SpringWebfluxSessionStore implements SessionStore {
                 currentTimeout += timeoutIncrement;
             } catch (final InterruptedException e) {
                 LOGGER.debug("Aborted wait: {}", e.getMessage());
+                nbWaitInterruptions++;
                 return;
             }
+        }
+        if (session == null) {
+            nbWaitErrors++;
         }
     }
 
@@ -139,6 +145,6 @@ public class SpringWebfluxSessionStore implements SessionStore {
     @Override
     public String toString() {
         return CommonHelper.toNiceString(this.getClass(), "timeout", timeout, "timeoutIncrement", timeoutIncrement,
-                "nbCalls", nbCalls, "waitedTime", waitedTime);
+                "waitedTime", waitedTime, "nbWaitCalls", nbWaitCalls, "nbWaitErrors", nbWaitErrors, "nbWaitInterruptions", nbWaitInterruptions);
     }
 }
