@@ -1,13 +1,13 @@
 package org.pac4j.springframework.web;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.springframework.context.SpringWebfluxSessionStore;
+import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
 import org.springframework.web.server.ServerWebExchange;
@@ -61,14 +61,14 @@ public class SecurityFilter implements WebFilter {
         final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
         final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        final WebContext context = FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+        final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
 
         final Object result = bestLogic.perform(context, bestSessionStore, config, (ctx, session, profiles, parameters) -> ACCESS_GRANTED, bestAdapter, clients, authorizers, matchers);
         if (result == ACCESS_GRANTED) {
             return webFilterChain.filter(serverWebExchange);
         }
 
-        return Mono.empty();
+        return context.getResult();
     }
 
     public SecurityLogic getSecurityLogic() {

@@ -1,13 +1,13 @@
 package org.pac4j.springframework.web;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.springframework.context.SpringWebfluxSessionStore;
+import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * <p>This controller handles the (application + identity provider) logout process.</p>
@@ -46,15 +47,17 @@ public class LogoutController {
     private Config config;
 
     @RequestMapping("${pac4j.logout.path:/logout}")
-    public void logout(final ServerWebExchange serverWebExchange) {
+    public Mono<Void> logout(final ServerWebExchange serverWebExchange) {
 
         final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
         final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
         final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
-        final WebContext context = FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+        final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
 
         bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+
+        return context.getResult();
     }
 
     public String getDefaultUrl() {

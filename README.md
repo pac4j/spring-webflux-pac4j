@@ -39,6 +39,11 @@ It's based on Java 11, Spring Webflux 5 and on the **[pac4j security engine](htt
 ### 4) [Get the authenticated user profiles](https://github.com/pac4j/spring-webflux-pac4j/wiki/Get-the-authenticated-user-profiles)
 
 
+## Demos
+
+Spring Boot demo: [spring-webflux-pac4j-boot-demo](https://github.com/pac4j/spring-webflux-pac4j-boot-demo).
+
+
 ## Versions
 
 The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/spring-webflux-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/spring-webflux-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).

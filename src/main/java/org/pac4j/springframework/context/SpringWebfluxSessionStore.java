@@ -24,6 +24,8 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     private WebSession session;
 
+    private boolean loaded;
+
     private int timeout = 25;
 
     private int timeoutIncrement = 5;
@@ -34,14 +36,17 @@ public class SpringWebfluxSessionStore implements SessionStore {
     private static long waitedTime = 0;
 
     public SpringWebfluxSessionStore(final ServerWebExchange exchange) {
+        loaded = false;
         exchange.getSession().subscribe(
                 value -> {
                     LOGGER.debug("Retrieved session: {}", session);
                     session = value;
+                    loaded = true;
                     },
                 error -> { throw new TechnicalException("Cannot get session"); },
                 () -> {
                     LOGGER.debug("No session available");
+                    loaded = true;
                 }
         );
     }
@@ -89,7 +94,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
     protected void waitForSession() {
         nbWaitCalls++;
         int currentTimeout = 0;
-        while (session == null && currentTimeout <= timeout) {
+        while (!loaded && currentTimeout <= timeout) {
             LOGGER.debug("WAITING for session, current timeout: {} ms ", currentTimeout);
             try {
                 Thread.sleep(timeoutIncrement);
@@ -101,7 +106,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
                 return;
             }
         }
-        if (session == null) {
+        if (!loaded) {
             nbWaitErrors++;
         }
     }
@@ -126,6 +131,14 @@ public class SpringWebfluxSessionStore implements SessionStore {
         return false;
     }
 
+    public WebSession getSession() {
+        return session;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
     public int getTimeout() {
         return timeout;
     }
@@ -142,9 +155,26 @@ public class SpringWebfluxSessionStore implements SessionStore {
         this.timeoutIncrement = timeoutIncrement;
     }
 
+    public static long getNbWaitCalls() {
+        return nbWaitCalls;
+    }
+
+    public static long getNbWaitInterruptions() {
+        return nbWaitInterruptions;
+    }
+
+    public static long getNbWaitErrors() {
+        return nbWaitErrors;
+    }
+
+    public static long getWaitedTime() {
+        return waitedTime;
+    }
+
     @Override
     public String toString() {
-        return CommonHelper.toNiceString(this.getClass(), "timeout", timeout, "timeoutIncrement", timeoutIncrement,
-                "waitedTime", waitedTime, "nbWaitCalls", nbWaitCalls, "nbWaitErrors", nbWaitErrors, "nbWaitInterruptions", nbWaitInterruptions);
+        return CommonHelper.toNiceString(this.getClass(), "session", session, "loaded", loaded,
+                "timeout", timeout, "timeoutIncrement", timeoutIncrement, "waitedTime", waitedTime,
+                "nbWaitCalls", nbWaitCalls, "nbWaitErrors", nbWaitErrors, "nbWaitInterruptions", nbWaitInterruptions);
     }
 }

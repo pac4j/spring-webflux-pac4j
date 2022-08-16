@@ -27,7 +27,8 @@ public class SpringWebfluxHttpActionAdapter implements HttpActionAdapter {
     public Object adapt(final HttpAction action, final WebContext context) {
         if (action != null) {
             var code = action.getCode();
-            final var response = ((SpringWebfluxWebContext) context).getNativeResponse();
+            final var springWebfluxContext = (SpringWebfluxWebContext) context;
+            final var response = springWebfluxContext.getNativeResponse();
             response.setRawStatusCode(code);
 
             if (action instanceof WithLocationAction) {
@@ -40,7 +41,7 @@ public class SpringWebfluxHttpActionAdapter implements HttpActionAdapter {
 
                 if (content != null) {
                     final DataBuffer data = response.bufferFactory().wrap(content.getBytes(StandardCharsets.UTF_8));
-                    response.writeWith(Mono.just(data));
+                    springWebfluxContext.setResult(response.writeWith(Mono.just(data)));
                 }
             }
 

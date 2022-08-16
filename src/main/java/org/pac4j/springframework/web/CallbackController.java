@@ -1,13 +1,13 @@
 package org.pac4j.springframework.web;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.springframework.context.SpringWebfluxSessionStore;
+import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * <p>This controller finishes the login process for an indirect client.</p>
@@ -41,21 +42,23 @@ public class CallbackController {
     private Config config;
 
     @RequestMapping("${pac4j.callback.path:/callback}")
-    public void callback(final ServerWebExchange serverWebExchange) {
+    public Mono<Void> callback(final ServerWebExchange serverWebExchange) {
 
         final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
         final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
         final CallbackLogic bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
 
-        final WebContext context = FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+        final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
 
         bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.renewSession, this.defaultClient);
+
+        return context.getResult();
     }
 
     @RequestMapping("${pac4j.callback.path/{cn}:/callback/{cn}}")
-    public void callbackWithClientName(final ServerWebExchange serverWebExchange, @PathVariable("cn") final String cn) {
+    public Mono<Void> callbackWithClientName(final ServerWebExchange serverWebExchange, @PathVariable("cn") final String cn) {
 
-        callback(serverWebExchange);
+        return callback(serverWebExchange);
     }
 
     public String getDefaultUrl() {
