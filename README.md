@@ -41,7 +41,9 @@ It's based on Java 11, Spring Webflux 5 and on the **[pac4j security engine](htt
 
 ## Demos
 
-Spring Boot demo: [spring-webflux-pac4j-boot-demo](https://github.com/pac4j/spring-webflux-pac4j-boot-demo).
+Spring Webflux boot demo: [spring-webflux-pac4j-boot-demo](https://github.com/pac4j/spring-webflux-pac4j-boot-demo).
+
+Spring Security reactive boot demo: [spring-security-reactive-pac4j-boot-demo](https://github.com/pac4j/spring-security-reactive-pac4j-boot-demo).
 
 
 ## Versions
