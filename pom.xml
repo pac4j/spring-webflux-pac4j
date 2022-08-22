@@ -12,7 +12,7 @@
     <artifactId>spring-webflux-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>Spring Webflux security framework based on pac4j</name>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <description>Security library for Spring Webflux based on pac4j</description>
     <url>https://github.com/pac4j/spring-webflux-pac4j</url>
 
