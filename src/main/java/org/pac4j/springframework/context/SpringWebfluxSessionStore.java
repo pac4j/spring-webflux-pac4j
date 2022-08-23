@@ -22,9 +22,12 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringWebfluxSessionStore.class);
 
+    private final ServerWebExchange exchange;
+
     private WebSession session;
 
     private boolean loaded;
+    private boolean subscribed;
 
     private int timeout = 25;
 
@@ -36,19 +39,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
     private static long waitedTime = 0;
 
     public SpringWebfluxSessionStore(final ServerWebExchange exchange) {
-        loaded = false;
-        exchange.getSession().subscribe(
-                value -> {
-                    LOGGER.debug("Retrieved session: {}", session);
-                    session = value;
-                    loaded = true;
-                    },
-                error -> { throw new TechnicalException("Cannot get session"); },
-                () -> {
-                    LOGGER.debug("No session available");
-                    loaded = true;
-                }
-        );
+        this.exchange = exchange;
     }
 
     @Override
@@ -91,17 +82,67 @@ public class SpringWebfluxSessionStore implements SessionStore {
         }
     }
 
+    @Override
+    public boolean destroySession(final WebContext context) {
+        LOGGER.debug("Invalidatin session...");
+
+        waitForSession();
+
+        if (session != null) {
+            session.invalidate();
+            subscribed = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean renewSession(final WebContext context) {
+        LOGGER.debug("Renewing session...");
+
+        waitForSession();
+
+        if (session != null) {
+            session.changeSessionId();
+            subscribed = false;
+            return true;
+        }
+
+        return false;
+    }
+
     protected void waitForSession() {
+        if (!subscribed) {
+            LOGGER.debug("<> Subscribing to session...");
+            subscribed = true;
+            loaded = false;
+            exchange.getSession().subscribe(
+                    value -> {
+                        LOGGER.debug("<> Retrieved session: {}", session);
+                        session = value;
+                        loaded = true;
+                    },
+                    error -> {
+                        throw new TechnicalException("Cannot get session");
+                    },
+                    () -> {
+                        LOGGER.debug("<> No session available");
+                        loaded = true;
+                    }
+            );
+        }
+
         nbWaitCalls++;
         int currentTimeout = 0;
         while (!loaded && currentTimeout <= timeout) {
-            LOGGER.debug("WAITING for session, current timeout: {} ms ", currentTimeout);
+            LOGGER.debug("<> WAITING for session, current timeout: {} ms ", currentTimeout);
             try {
                 Thread.sleep(timeoutIncrement);
                 waitedTime += timeoutIncrement;
                 currentTimeout += timeoutIncrement;
             } catch (final InterruptedException e) {
-                LOGGER.debug("Aborted wait: {}", e.getMessage());
+                LOGGER.debug("<> Aborted wait: {}", e.getMessage());
                 nbWaitInterruptions++;
                 return;
             }
@@ -112,11 +153,6 @@ public class SpringWebfluxSessionStore implements SessionStore {
     }
 
     @Override
-    public boolean destroySession(final WebContext context) {
-        return false;
-    }
-
-    @Override
     public Optional<Object> getTrackableSession(final WebContext context) {
         return Optional.empty();
     }
@@ -124,11 +160,6 @@ public class SpringWebfluxSessionStore implements SessionStore {
     @Override
     public Optional<SessionStore> buildFromTrackableSession(final WebContext context, final Object trackableSession) {
         return Optional.empty();
-    }
-
-    @Override
-    public boolean renewSession(final WebContext context) {
-        return false;
     }
 
     public WebSession getSession() {

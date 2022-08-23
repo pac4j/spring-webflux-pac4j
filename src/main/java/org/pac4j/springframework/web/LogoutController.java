@@ -46,18 +46,32 @@ public class LogoutController {
     @Autowired
     private Config config;
 
+    private static long consumedTime = 0;
+
     @RequestMapping("${pac4j.logout.path:/logout}")
     public Mono<Void> logout(final ServerWebExchange serverWebExchange) {
 
-        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
-        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
-        final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
+        final long t0 = System.currentTimeMillis();
+        try {
 
-        final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+            final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
+            final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
+            final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
-        bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
 
-        return context.getResult();
+            bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+
+            return context.getResult();
+
+        } finally {
+            final long t1 = System.currentTimeMillis();
+            trackTime(t0, t1);
+        }
+    }
+
+    protected void trackTime(final long t0, final long t1) {
+        consumedTime += t1-t0;
     }
 
     public String getDefaultUrl() {
@@ -114,5 +128,9 @@ public class LogoutController {
 
     public void setDestroySession(final Boolean destroySession) {
         this.destroySession = destroySession;
+    }
+
+    public static long getConsumedTime() {
+        return consumedTime;
     }
 }

@@ -35,6 +35,8 @@ public class SecurityFilter implements WebFilter {
 
     private Config config;
 
+    private static long consumedTime = 0;
+
     public SecurityFilter(final Config config) {
         this.config = config;
     }
@@ -57,18 +59,30 @@ public class SecurityFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
 
-        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
-        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
-        final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
+        final long t0 = System.currentTimeMillis();
+        try {
 
-        final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+            final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
+            final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
+            final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        final Object result = bestLogic.perform(context, bestSessionStore, config, (ctx, session, profiles, parameters) -> ACCESS_GRANTED, bestAdapter, clients, authorizers, matchers);
-        if (result == ACCESS_GRANTED) {
-            return webFilterChain.filter(serverWebExchange);
+            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+
+            final Object result = bestLogic.perform(context, bestSessionStore, config, (ctx, session, profiles, parameters) -> ACCESS_GRANTED, bestAdapter, clients, authorizers, matchers);
+            if (result == ACCESS_GRANTED) {
+                return webFilterChain.filter(serverWebExchange);
+            }
+
+            return context.getResult();
+
+        } finally {
+            final long t1 = System.currentTimeMillis();
+            trackTime(t0, t1);
         }
+    }
 
-        return context.getResult();
+    protected void trackTime(final long t0, final long t1) {
+        consumedTime += t1-t0;
     }
 
     public SecurityLogic getSecurityLogic() {
@@ -109,5 +123,9 @@ public class SecurityFilter implements WebFilter {
 
     public void setConfig(Config config) {
         this.config = config;
+    }
+
+    public static long getConsumedTime() {
+        return consumedTime;
     }
 }

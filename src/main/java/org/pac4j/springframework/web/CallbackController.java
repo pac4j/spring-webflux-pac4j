@@ -41,18 +41,32 @@ public class CallbackController {
     @Autowired
     private Config config;
 
+    private static long consumedTime = 0;
+
     @RequestMapping("${pac4j.callback.path:/callback}")
     public Mono<Void> callback(final ServerWebExchange serverWebExchange) {
 
-        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
-        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
-        final CallbackLogic bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
+        final long t0 = System.currentTimeMillis();
+        try {
 
-        final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+            final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
+            final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
+            final CallbackLogic bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
 
-        bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.renewSession, this.defaultClient);
+            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
 
-        return context.getResult();
+            bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.renewSession, this.defaultClient);
+
+            return context.getResult();
+
+        } finally {
+            final long t1 = System.currentTimeMillis();
+            trackTime(t0, t1);
+        }
+    }
+
+    protected void trackTime(final long t0, final long t1) {
+        consumedTime += t1-t0;
     }
 
     @RequestMapping("${pac4j.callback.path/{cn}:/callback/{cn}}")
@@ -99,5 +113,9 @@ public class CallbackController {
 
     public void setConfig(final Config config) {
         this.config = config;
+    }
+
+    public static long getConsumedTime() {
+        return consumedTime;
     }
 }
