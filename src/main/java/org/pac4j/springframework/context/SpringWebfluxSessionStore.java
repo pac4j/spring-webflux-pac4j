@@ -40,6 +40,27 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     public SpringWebfluxSessionStore(final ServerWebExchange exchange) {
         this.exchange = exchange;
+        loadSession();
+    }
+
+    protected void loadSession() {
+        LOGGER.debug("<> Subscribing to session...");
+        subscribed = true;
+        loaded = false;
+        exchange.getSession().subscribe(
+                value -> {
+                    LOGGER.debug("<> Retrieved session: {}", session);
+                    session = value;
+                    loaded = true;
+                },
+                error -> {
+                    throw new TechnicalException("Cannot get session");
+                },
+                () -> {
+                    LOGGER.debug("<> No session available");
+                    loaded = true;
+                }
+        );
     }
 
     @Override
@@ -114,23 +135,7 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     protected void waitForSession() {
         if (!subscribed) {
-            LOGGER.debug("<> Subscribing to session...");
-            subscribed = true;
-            loaded = false;
-            exchange.getSession().subscribe(
-                    value -> {
-                        LOGGER.debug("<> Retrieved session: {}", session);
-                        session = value;
-                        loaded = true;
-                    },
-                    error -> {
-                        throw new TechnicalException("Cannot get session");
-                    },
-                    () -> {
-                        LOGGER.debug("<> No session available");
-                        loaded = true;
-                    }
-            );
+            loadSession();
         }
 
         nbWaitCalls++;
