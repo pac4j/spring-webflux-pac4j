@@ -6,6 +6,8 @@ import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
+import org.pac4j.core.util.security.SecurityEndpoint;
+import org.pac4j.core.util.security.SecurityEndpointBuilder;
 import org.pac4j.springframework.context.SpringWebfluxSessionStore;
 import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
@@ -21,11 +23,13 @@ import reactor.core.publisher.Mono;
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public class SecurityFilter implements WebFilter {
+public class SecurityFilter implements WebFilter, SecurityEndpoint {
 
     private static final Object ACCESS_GRANTED = new Object();
 
     private SecurityLogic securityLogic;
+
+    private HttpActionAdapter httpActionAdapter;
 
     private String clients;
 
@@ -41,19 +45,9 @@ public class SecurityFilter implements WebFilter {
         this.config = config;
     }
 
-    public SecurityFilter(final Config config, final String clients) {
+    public SecurityFilter(final Config config, final Object... parameters) {
         this(config);
-        this.clients = clients;
-    }
-
-    public SecurityFilter(final Config config, final String clients, final String authorizers) {
-        this(config, clients);
-        this.authorizers = authorizers;
-    }
-
-    public SecurityFilter(final Config config, final String clients, final String authorizers, final String matchers) {
-        this(config, clients, authorizers);
-        this.matchers = matchers;
+        SecurityEndpointBuilder.buildConfig(this, config, parameters);
     }
 
     @Override
@@ -89,15 +83,26 @@ public class SecurityFilter implements WebFilter {
         return securityLogic;
     }
 
+    @Override
     public void setSecurityLogic(SecurityLogic securityLogic) {
         this.securityLogic = securityLogic;
+    }
+
+    public HttpActionAdapter getHttpActionAdapter() {
+        return httpActionAdapter;
+    }
+
+    @Override
+    public void setHttpActionAdapter(final HttpActionAdapter httpActionAdapter) {
+        this.httpActionAdapter = httpActionAdapter;
     }
 
     public String getClients() {
         return clients;
     }
 
-    public void setClients(String clients) {
+    @Override
+    public void setClients(final String clients) {
         this.clients = clients;
     }
 
@@ -105,7 +110,8 @@ public class SecurityFilter implements WebFilter {
         return authorizers;
     }
 
-    public void setAuthorizers(String authorizers) {
+    @Override
+    public void setAuthorizers(final String authorizers) {
         this.authorizers = authorizers;
     }
 
@@ -113,7 +119,8 @@ public class SecurityFilter implements WebFilter {
         return matchers;
     }
 
-    public void setMatchers(String matchers) {
+    @Override
+    public void setMatchers(final String matchers) {
         this.matchers = matchers;
     }
 
