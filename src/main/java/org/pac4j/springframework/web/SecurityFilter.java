@@ -41,12 +41,8 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
 
     private static long consumedTime = 0;
 
-    public SecurityFilter(final Config config) {
-        this.config = config;
-    }
-
     public SecurityFilter(final Config config, final Object... parameters) {
-        this(config);
+        this.config = config;
         SecurityEndpointBuilder.buildConfig(this, config, parameters);
     }
 
