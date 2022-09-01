@@ -29,9 +29,9 @@ public class SpringWebfluxSessionStore implements SessionStore {
     private boolean loaded;
     private boolean subscribed;
 
-    private int timeout = 25;
+    private int timeout = 20;
 
-    private int timeoutIncrement = 5;
+    private int timeoutIncrement = 3;
 
     private static long nbWaitCalls = 0;
     private static long nbWaitInterruptions = 0;
