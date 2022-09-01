@@ -6,7 +6,7 @@ import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
-import org.pac4j.springframework.context.SpringWebfluxSessionStore;
+import org.pac4j.springframework.context.SpringWebfluxSessionStoreFactory;
 import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
@@ -54,13 +54,13 @@ public class LogoutController {
         final long t0 = System.currentTimeMillis();
         try {
 
-            final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
             final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
             final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
             final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+            final SessionStore sessionStore = FindBest.sessionStoreFactory(null, config, SpringWebfluxSessionStoreFactory.INSTANCE).newSessionStore(serverWebExchange);
 
-            bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+            bestLogic.perform(context, sessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
 
             return context.getResult();
 

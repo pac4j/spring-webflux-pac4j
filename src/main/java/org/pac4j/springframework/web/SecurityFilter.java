@@ -8,7 +8,7 @@ import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.security.SecurityEndpoint;
 import org.pac4j.core.util.security.SecurityEndpointBuilder;
-import org.pac4j.springframework.context.SpringWebfluxSessionStore;
+import org.pac4j.springframework.context.SpringWebfluxSessionStoreFactory;
 import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
@@ -41,9 +41,29 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
 
     private static long consumedTime = 0;
 
-    public SecurityFilter(final Config config, final Object... parameters) {
+    public SecurityFilter(final Config config) {
         this.config = config;
-        SecurityEndpointBuilder.buildConfig(this, config, parameters);
+    }
+
+    public SecurityFilter(final Config config, final String clients) {
+        this(config);
+        this.clients = clients;
+    }
+
+    public SecurityFilter(final Config config, final String clients, final String authorizers) {
+        this(config, clients);
+        this.authorizers = authorizers;
+    }
+
+    public SecurityFilter(final Config config, final String clients, final String authorizers, final String matchers) {
+        this(config, clients, authorizers);
+        this.matchers = matchers;
+    }
+
+    public static SecurityFilter build(final Config config, Object... parameters) {
+        final SecurityFilter securityFilter = new SecurityFilter(config);
+        SecurityEndpointBuilder.buildConfig(securityFilter, config, parameters);
+        return securityFilter;
     }
 
     @Override
@@ -52,13 +72,13 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
         final long t0 = System.currentTimeMillis();
         try {
 
-            final SessionStore bestSessionStore = FindBest.sessionStore(null, config, new SpringWebfluxSessionStore(serverWebExchange));
             final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, SpringWebfluxHttpActionAdapter.INSTANCE);
             final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
             final SpringWebfluxWebContext context = (SpringWebfluxWebContext) FindBest.webContextFactory(null, config, SpringWebfluxWebContextFactory.INSTANCE).newContext(serverWebExchange);
+            final SessionStore sessionStore = FindBest.sessionStoreFactory(null, config, SpringWebfluxSessionStoreFactory.INSTANCE).newSessionStore(serverWebExchange);
 
-            final Object result = bestLogic.perform(context, bestSessionStore, config, (ctx, session, profiles, parameters) -> ACCESS_GRANTED, bestAdapter, clients, authorizers, matchers);
+            final Object result = bestLogic.perform(context, sessionStore, config, (ctx, session, profiles, parameters) -> ACCESS_GRANTED, bestAdapter, clients, authorizers, matchers);
             if (result == ACCESS_GRANTED) {
                 return webFilterChain.filter(serverWebExchange);
             }
