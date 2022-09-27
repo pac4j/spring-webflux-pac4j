@@ -41,6 +41,8 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
 
     private static long consumedTime = 0;
 
+    public SecurityFilter() {}
+
     public SecurityFilter(final Config config) {
         this.config = config;
     }
@@ -60,9 +62,9 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
         this.matchers = matchers;
     }
 
-    public static SecurityFilter build(final Config config, Object... parameters) {
-        final SecurityFilter securityFilter = new SecurityFilter(config);
-        SecurityEndpointBuilder.buildConfig(securityFilter, config, parameters);
+    public static SecurityFilter build(Object... parameters) {
+        final SecurityFilter securityFilter = new SecurityFilter();
+        SecurityEndpointBuilder.buildConfig(securityFilter, parameters);
         return securityFilter;
     }
 
@@ -144,6 +146,7 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
         return config;
     }
 
+    @Override
     public void setConfig(Config config) {
         this.config = config;
     }
