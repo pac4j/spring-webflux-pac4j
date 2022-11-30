@@ -3,7 +3,12 @@
 </p>
 
 The `spring-webflux-pac4j` project is an **easy and powerful security library for Spring Webflux / Spring Boot web applications and web services**. It supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
-It's based on Java 17 (or 11), Spring Webflux 6 (or 5) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v5**. It's available under the Apache 2 license.
+It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
+
+| spring-webflux-pac4j | JDK | pac4j | Spring |
+|----------------------|-----|-------|--------|
+| version >= 2         | 17  | v5    | v6     |
+| version >= 1         | 11  | v5    | v5     |
 
 [**Main concepts and components:**](https://www.pac4j.org/docs/main-concepts-and-components.html)
 
@@ -51,7 +56,7 @@ Spring Security reactive boot demo: [spring-security-reactive-pac4j-boot-demo](h
 The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/spring-webflux-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/spring-webflux-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
 The [next version](https://github.com/pac4j/spring-webflux-pac4j/wiki/Next-version) is under development.
 
-See the [release notes](https://github.com/pac4j/spring-webflux-pac4j/wiki/Release-Notes). Learn more by browsing the [pac4j documentation](https://www.javadoc.io/doc/org.pac4j/pac4j-core/5.6.0/index.html) and the [spring-webflux-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/spring-webflux-pac4j/1.2.0).
+See the [release notes](https://github.com/pac4j/spring-webflux-pac4j/wiki/Release-Notes). Learn more by browsing the [pac4j documentation](https://www.javadoc.io/doc/org.pac4j/pac4j-core/5.7.0/index.html) and the [spring-webflux-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/spring-webflux-pac4j/2.0.0).
 
 See the [migration guide](https://github.com/pac4j/spring-webflux-pac4j/wiki/Migration-guide) as well.
 
