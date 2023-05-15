@@ -59,7 +59,7 @@
 
     <properties>
         <pac4j.version>5.7.1</pac4j.version>
-        <spring.version>6.0.8</spring.version>
+        <spring.version>6.0.9</spring.version>
         <java.version>17</java.version>
         <pmdVersion>6.55.0</pmdVersion>
     </properties>
