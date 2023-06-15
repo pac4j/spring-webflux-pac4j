@@ -1,8 +1,8 @@
 package org.pac4j.springframework.context;
 
+import org.pac4j.core.context.FrameworkParameters;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.context.session.SessionStoreFactory;
-import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Build the session store for Spring Webflux.
@@ -17,8 +17,8 @@ public class SpringWebfluxSessionStoreFactory implements SessionStoreFactory {
     private SpringWebfluxSessionStoreFactory() {}
 
     @Override
-    public SessionStore newSessionStore(final Object... objects) {
-        final ServerWebExchange exchange = (ServerWebExchange) objects[0];
-        return new SpringWebfluxSessionStore(exchange);
+    public SessionStore newSessionStore(FrameworkParameters parameters) {
+        WebFluxFrameworkParameters webFluxParameters = (WebFluxFrameworkParameters) parameters;
+        return new SpringWebfluxSessionStore(webFluxParameters.getExchange());
     }
 }

@@ -1,9 +1,9 @@
 package org.pac4j.springframework.context;
 
+import lombok.ToString;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.exception.TechnicalException;
-import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ServerWebExchange;
@@ -18,6 +18,8 @@ import java.util.Optional;
  * @author Jerome Leleu
  * @since 1.0.0
  */
+
+@ToString(callSuper = true)
 public class SpringWebfluxSessionStore implements SessionStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringWebfluxSessionStore.class);
@@ -205,12 +207,5 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     public static long getWaitedTime() {
         return waitedTime;
-    }
-
-    @Override
-    public String toString() {
-        return CommonHelper.toNiceString(this.getClass(), "session", session, "loaded", loaded,
-                "timeout", timeout, "timeoutIncrement", timeoutIncrement, "waitedTime", waitedTime,
-                "nbWaitCalls", nbWaitCalls, "nbWaitErrors", nbWaitErrors, "nbWaitInterruptions", nbWaitInterruptions);
     }
 }

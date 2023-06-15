@@ -73,7 +73,7 @@ public class SpringWebfluxWebContext implements WebContext {
 
     @Override
     public String getRequestMethod() {
-        return request.getMethodValue();
+        return request.getMethod().name();
     }
 
     @Override
