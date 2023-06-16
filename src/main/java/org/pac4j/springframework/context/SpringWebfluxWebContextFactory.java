@@ -16,7 +16,7 @@ public class SpringWebfluxWebContextFactory implements WebContextFactory {
 
     @Override
     public WebContext newContext(FrameworkParameters parameters) {
-        WebFluxFrameworkParameters webFluxParameters = (WebFluxFrameworkParameters) parameters;
+        SpringWebFluxFrameworkParameters webFluxParameters = (SpringWebFluxFrameworkParameters) parameters;
         return new SpringWebfluxWebContext(webFluxParameters.getExchange());
     }
 }

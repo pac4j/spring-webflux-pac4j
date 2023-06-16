@@ -63,6 +63,8 @@
         <java.version>17</java.version>
         <pmdVersion>6.55.0</pmdVersion>
         <lombok.version>1.18.28</lombok.version>
+        <junit.version>5.9.3</junit.version>
+        <assertj.version>3.11.1</assertj.version>
     </properties>
 
     <dependencies>
@@ -85,6 +87,19 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+        </dependency>
+        <!-- for testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.11.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

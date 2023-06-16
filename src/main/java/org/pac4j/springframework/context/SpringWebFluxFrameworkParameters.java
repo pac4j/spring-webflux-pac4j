@@ -13,7 +13,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 @RequiredArgsConstructor
 @Getter
-public class WebFluxFrameworkParameters implements FrameworkParameters {
+public class SpringWebFluxFrameworkParameters implements FrameworkParameters {
 
     private final ServerWebExchange exchange;
 }

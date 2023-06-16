@@ -1,19 +1,15 @@
 package org.pac4j.springframework.web;
 
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.engine.DefaultSecurityLogic;
-import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.util.security.SecurityEndpoint;
 import org.pac4j.core.util.security.SecurityEndpointBuilder;
+import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
 import org.pac4j.springframework.context.SpringWebfluxWebContext;
-import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
-import org.pac4j.springframework.context.WebFluxFrameworkParameters;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-
-import static org.pac4j.springframework.util.FindBest.findBest;
 
 /**
  * <p>This filter protects an URL.</p>
@@ -65,16 +61,16 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
 
-        final WebFluxFrameworkParameters frameworkParameters = new WebFluxFrameworkParameters(serverWebExchange);
+        final SpringWebFluxFrameworkParameters frameworkParameters = new SpringWebFluxFrameworkParameters(serverWebExchange);
 
         final long t0 = System.currentTimeMillis();
         try {
 
-            final SecurityLogic bestLogic = findBest(null, config::getSecurityLogic, DefaultSecurityLogic.INSTANCE);
+            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) findBest(null, config::getWebContextFactory, SpringWebfluxWebContextFactory.INSTANCE).newContext(frameworkParameters);
+            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) config.getWebContextFactory().newContext(frameworkParameters);
 
-            final Object result = bestLogic.perform(config, (ctx, session, profiles) -> ACCESS_GRANTED, clients, authorizers, matchers, frameworkParameters);
+            final Object result = config.getSecurityLogic().perform(config, (ctx, session, profiles) -> ACCESS_GRANTED, clients, authorizers, matchers, frameworkParameters);
             if (result == ACCESS_GRANTED) {
                 return webFilterChain.filter(serverWebExchange);
             }

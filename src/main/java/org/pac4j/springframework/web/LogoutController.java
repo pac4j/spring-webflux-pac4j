@@ -1,19 +1,16 @@
 package org.pac4j.springframework.web;
 
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
+import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
 import org.pac4j.springframework.context.SpringWebfluxWebContext;
-import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
-import org.pac4j.springframework.context.WebFluxFrameworkParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import static org.pac4j.springframework.util.FindBest.findBest;
 
 /**
  * <p>This controller handles the (application + identity provider) logout process.</p>
@@ -49,16 +46,16 @@ public class LogoutController {
     @RequestMapping("${pac4j.logout.path:/logout}")
     public Mono<Void> logout(final ServerWebExchange serverWebExchange) {
 
-        final WebFluxFrameworkParameters frameworkParameters = new WebFluxFrameworkParameters(serverWebExchange);
+        final SpringWebFluxFrameworkParameters frameworkParameters = new SpringWebFluxFrameworkParameters(serverWebExchange);
 
         final long t0 = System.currentTimeMillis();
         try {
 
-            final LogoutLogic bestLogic = findBest(logoutLogic, config::getLogoutLogic, DefaultLogoutLogic.INSTANCE);
+            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) findBest(null, config::getWebContextFactory, SpringWebfluxWebContextFactory.INSTANCE).newContext(frameworkParameters);
+            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) config.getWebContextFactory().newContext(frameworkParameters);
 
-            bestLogic.perform(config, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout, frameworkParameters);
+            config.getLogoutLogic().perform(config, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout, frameworkParameters);
 
             return context.getResult();
 

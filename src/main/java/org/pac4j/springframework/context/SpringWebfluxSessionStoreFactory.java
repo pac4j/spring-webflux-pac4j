@@ -18,7 +18,7 @@ public class SpringWebfluxSessionStoreFactory implements SessionStoreFactory {
 
     @Override
     public SessionStore newSessionStore(FrameworkParameters parameters) {
-        WebFluxFrameworkParameters webFluxParameters = (WebFluxFrameworkParameters) parameters;
+        SpringWebFluxFrameworkParameters webFluxParameters = (SpringWebFluxFrameworkParameters) parameters;
         return new SpringWebfluxSessionStore(webFluxParameters.getExchange());
     }
 }
