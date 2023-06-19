@@ -4,7 +4,6 @@ import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.LogoutLogic;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
-import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -53,11 +52,9 @@ public class LogoutController {
 
             FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) config.getWebContextFactory().newContext(frameworkParameters);
-
             config.getLogoutLogic().perform(config, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout, frameworkParameters);
 
-            return context.getResult();
+            return Mono.empty();
 
         } finally {
             final long t1 = System.currentTimeMillis();

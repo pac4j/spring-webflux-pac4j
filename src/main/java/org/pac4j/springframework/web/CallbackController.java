@@ -4,7 +4,6 @@ import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
-import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -48,11 +47,9 @@ public class CallbackController {
 
             FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            SpringWebfluxWebContext context = (SpringWebfluxWebContext) config.getWebContextFactory().newContext(frameworkParameters);
-
             config.getCallbackLogic().perform(config, this.defaultUrl, this.renewSession, this.defaultClient, frameworkParameters);
 
-            return context.getResult();
+            return Mono.empty();
 
         } finally {
             final long t1 = System.currentTimeMillis();

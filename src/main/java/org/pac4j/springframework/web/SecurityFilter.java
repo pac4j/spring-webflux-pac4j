@@ -5,7 +5,6 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.util.security.SecurityEndpoint;
 import org.pac4j.core.util.security.SecurityEndpointBuilder;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
-import org.pac4j.springframework.context.SpringWebfluxWebContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -68,14 +67,12 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
 
             FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            final SpringWebfluxWebContext context = (SpringWebfluxWebContext) config.getWebContextFactory().newContext(frameworkParameters);
-
             final Object result = config.getSecurityLogic().perform(config, (ctx, session, profiles) -> ACCESS_GRANTED, clients, authorizers, matchers, frameworkParameters);
             if (result == ACCESS_GRANTED) {
                 return webFilterChain.filter(serverWebExchange);
             }
 
-            return context.getResult();
+            return Mono.empty();
 
         } finally {
             final long t1 = System.currentTimeMillis();
