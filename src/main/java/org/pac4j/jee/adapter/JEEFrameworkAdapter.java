@@ -1,4 +1,4 @@
-package org.pac4j.framework.adapter;
+package org.pac4j.jee.adapter;
 
 import org.pac4j.core.adapter.DefaultFrameworkAdapter;
 import org.pac4j.core.adapter.FrameworkAdapter;
@@ -16,7 +16,7 @@ import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
  * @author Marvin Kienitz
  * @since 3.0.0
  */
-public class FrameworkAdapterImpl extends DefaultFrameworkAdapter {
+public class JEEFrameworkAdapter extends DefaultFrameworkAdapter {
 
     /** {@inheritDoc} */
     @Override

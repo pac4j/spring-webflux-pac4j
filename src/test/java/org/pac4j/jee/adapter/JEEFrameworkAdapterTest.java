@@ -1,4 +1,4 @@
-package org.pac4j.framework.adapter;
+package org.pac4j.jee.adapter;
 
 import org.junit.jupiter.api.Test;
 import org.pac4j.core.adapter.FrameworkAdapter;
@@ -9,11 +9,11 @@ import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class FrameworkAdapterImplTest {
+class JEEFrameworkAdapterTest {
 
     @Test
     public void testCorrectInstance() {
-        assertThat(FrameworkAdapter.INSTANCE).isExactlyInstanceOf(FrameworkAdapterImpl.class);
+        assertThat(FrameworkAdapter.INSTANCE).isExactlyInstanceOf(JEEFrameworkAdapter.class);
     }
 
     @Test
