@@ -8,7 +8,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -27,8 +26,6 @@ public class SpringWebfluxWebContext implements WebContext {
     private final ServerHttpRequest request;
 
     private final ServerHttpResponse response;
-
-    private Mono<Void> result = Mono.empty();
 
     public SpringWebfluxWebContext(final ServerWebExchange exchange) {
         this.exchange = exchange;
@@ -162,13 +159,5 @@ public class SpringWebfluxWebContext implements WebContext {
     @Override
     public String getPath() {
         return request.getPath().value();
-    }
-
-    public Mono<Void> getResult() {
-        return result;
-    }
-
-    public void setResult(final Mono<Void> result) {
-        this.result = result;
     }
 }

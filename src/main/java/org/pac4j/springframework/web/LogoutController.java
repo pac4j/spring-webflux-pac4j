@@ -52,9 +52,7 @@ public class LogoutController {
 
             FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            config.getLogoutLogic().perform(config, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout, frameworkParameters);
-
-            return Mono.empty();
+            return (Mono<Void>) config.getLogoutLogic().perform(config, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout, frameworkParameters);
 
         } finally {
             final long t1 = System.currentTimeMillis();

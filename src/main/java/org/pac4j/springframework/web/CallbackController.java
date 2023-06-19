@@ -47,9 +47,7 @@ public class CallbackController {
 
             FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            config.getCallbackLogic().perform(config, this.defaultUrl, this.renewSession, this.defaultClient, frameworkParameters);
-
-            return Mono.empty();
+            return (Mono<Void>) config.getCallbackLogic().perform(config, this.defaultUrl, this.renewSession, this.defaultClient, frameworkParameters);
 
         } finally {
             final long t1 = System.currentTimeMillis();

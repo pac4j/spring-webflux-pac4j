@@ -5,6 +5,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.util.security.SecurityEndpoint;
 import org.pac4j.core.util.security.SecurityEndpointBuilder;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
+import org.springframework.lang.NonNull;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -58,7 +59,7 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
+    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange serverWebExchange, @NonNull WebFilterChain webFilterChain) {
 
         final SpringWebFluxFrameworkParameters frameworkParameters = new SpringWebFluxFrameworkParameters(serverWebExchange);
 
@@ -72,7 +73,7 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
                 return webFilterChain.filter(serverWebExchange);
             }
 
-            return Mono.empty();
+            return (Mono<Void>) result;
 
         } finally {
             final long t1 = System.currentTimeMillis();
