@@ -10,7 +10,7 @@ import org.pac4j.springframework.http.SpringWebfluxHttpActionAdapter;
 /**
  * The WebFlux framework adapter.
  * <p>
- * Needs to be called "FrameworkAdapterImpl",
+ * Needs to be called "JEEFrameworkAdapter",
  * so that static initializer of {@link FrameworkAdapter} can discover it.
  *
  * @author Marvin Kienitz
