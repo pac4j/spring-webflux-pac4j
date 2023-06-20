@@ -24,7 +24,7 @@ public class SpringWebfluxHttpActionAdapter implements HttpActionAdapter {
     public static final SpringWebfluxHttpActionAdapter INSTANCE = new SpringWebfluxHttpActionAdapter();
 
     @Override
-    public Object adapt(final HttpAction action, final WebContext context) {
+    public Mono<?> adapt(final HttpAction action, final WebContext context) {
         if (action != null) {
             var code = action.getCode();
             final var springWebfluxContext = (SpringWebfluxWebContext) context;
@@ -41,11 +41,11 @@ public class SpringWebfluxHttpActionAdapter implements HttpActionAdapter {
 
                 if (content != null) {
                     final DataBuffer data = response.bufferFactory().wrap(content.getBytes(StandardCharsets.UTF_8));
-                    springWebfluxContext.setResult(response.writeWith(Mono.just(data)));
+                    return response.writeWith(Mono.just(data));
                 }
             }
 
-            return null;
+            return Mono.empty();
         }
 
         throw new TechnicalException("No action provided");
