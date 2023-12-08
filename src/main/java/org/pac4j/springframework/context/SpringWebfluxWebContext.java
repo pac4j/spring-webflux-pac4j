@@ -1,10 +1,8 @@
 package org.pac4j.springframework.context;
 
-import lombok.val;
 import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.util.CommonHelper;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -161,16 +159,5 @@ public class SpringWebfluxWebContext implements WebContext {
     @Override
     public String getPath() {
         return request.getPath().value();
-    }
-
-    @Override
-    public Optional<String> getQueryString() {
-        var queryString = "";
-        for (val params : request.getQueryParams().entrySet()) {
-            for (val param : params.getValue()) {
-                queryString = CommonHelper.addParameter(queryString, params.getKey(), param);
-            }
-        }
-        return Optional.of(queryString);
     }
 }
