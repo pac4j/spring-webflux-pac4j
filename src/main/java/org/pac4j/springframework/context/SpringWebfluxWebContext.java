@@ -20,6 +20,7 @@ import java.util.*;
  * @since 1.0.0
  */
 public class SpringWebfluxWebContext implements WebContext {
+    public static final String SAML_BODY_ATTRIBUTE = "PAC4J_REQUEST_CONTENT";
 
     private final ServerWebExchange exchange;
 
@@ -159,5 +160,16 @@ public class SpringWebfluxWebContext implements WebContext {
     @Override
     public String getPath() {
         return request.getPath().value();
+    }
+
+    /**
+     * Authentication mechanisms like SAML requires the request content
+     * to extract relevant authentication parameters.
+     * @return Callback request content.
+     */
+    @Override
+    public  String getRequestContent() {
+        final Map<String, Object> attributes = exchange.getAttributes();
+        return (String) attributes.get(SAML_BODY_ATTRIBUTE);
     }
 }
