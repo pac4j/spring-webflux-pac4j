@@ -6,11 +6,17 @@ import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.nio.ByteBuffer;
+
+import static org.pac4j.springframework.context.SpringWebfluxWebContext.SAML_BODY_ATTRIBUTE;
 
 /**
  * <p>This controller finishes the login process for an indirect client.</p>
@@ -44,19 +50,28 @@ public class CallbackController {
 
         final long t0 = System.currentTimeMillis();
         try {
-
             FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+            return DataBufferUtils.join(serverWebExchange.getRequest().getBody())
+                    .map(DataBuffer::asByteBuffer)
+                    .map(ByteBuffer::array)
+                    .map(String::new).flatMap(s -> {
+                                // Include the request content in the attributes so that
+                                // downstream authentication mechanisms (e.g. SAML) can use
+                                // to extract authentication mechanism.
+                                serverWebExchange.getAttributes().put(SAML_BODY_ATTRIBUTE, s);
+                                return (Mono<Void>) config.getCallbackLogic().perform(config, this.defaultUrl, this.renewSession, this.defaultClient, frameworkParameters);
+                            }
 
-            return (Mono<Void>) config.getCallbackLogic().perform(config, this.defaultUrl, this.renewSession, this.defaultClient, frameworkParameters);
-
+                    );
         } finally {
             final long t1 = System.currentTimeMillis();
             trackTime(t0, t1);
         }
     }
 
+
     protected void trackTime(final long t0, final long t1) {
-        consumedTime += t1-t0;
+        consumedTime += t1 - t0;
     }
 
     @RequestMapping("${pac4j.callback.path/{cn}:/callback/{cn}}")
