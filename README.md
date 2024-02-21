@@ -7,6 +7,7 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 
 | spring-webflux-pac4j | JDK | pac4j | Spring |
 |----------------------|-----|-------|--------|
+| version >= 3         | 17  | v6    | v6     |
 | version >= 2         | 17  | v5    | v6     |
 | version >= 1         | 11  | v5    | v5     |
 
