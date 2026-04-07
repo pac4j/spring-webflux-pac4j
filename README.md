@@ -15,7 +15,7 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 
 1) A [**client**](https://www.pac4j.org/docs/clients.html) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for web application authentication while a direct client is for web services authentication:
 
-&#9656; OAuth - SAML - CAS - OpenID Connect - HTTP - Google App Engine - LDAP - SQL - JWT - MongoDB - CouchDB - Kerberos - IP address - Kerberos (SPNEGO) - REST API
+&#9656; OpenID Connect - SAML - CAS - OAuth - HTTP - LDAP - SQL - JWT - MongoDB - Kerberos - IP address - Kerberos (SPNEGO) - REST API
 
 2) An [**authorizer**](https://www.pac4j.org/docs/authorizers.html) is meant to check authorizations on the authenticated user profile(s) or on the current web context:
 
@@ -54,7 +54,8 @@ Spring Security reactive boot demo: [spring-security-reactive-pac4j-boot-demo](h
 
 ## Versions
 
-The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/spring-webflux-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/spring-webflux-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
+The latest released version is the [![Maven Central](https://img.shields.io/maven-central/v/org.pac4j/spring-webflux-pac4j.svg)](https://repo1.maven.org/maven2/org/pac4j/spring-webflux-pac4j).
+
 The [next version](https://github.com/pac4j/spring-webflux-pac4j/wiki/Next-version) is under development.
 
 See the [release notes](https://github.com/pac4j/spring-webflux-pac4j/wiki/Release-Notes).
