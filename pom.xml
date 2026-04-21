@@ -70,7 +70,7 @@
         <spring.version>7.0.6</spring.version>
         <java.version>17</java.version>
         <pmdVersion>6.55.0</pmdVersion>
-        <lombok.version>1.18.44</lombok.version>
+        <lombok.version>1.18.46</lombok.version>
         <junit.version>6.0.3</junit.version>
         <assertj.version>3.11.1</assertj.version>
     </properties>
