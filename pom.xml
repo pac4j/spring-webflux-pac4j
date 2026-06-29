@@ -69,7 +69,7 @@
         <pac4j.version>6.5.4</pac4j.version>
         <spring.version>7.0.8</spring.version>
         <java.version>17</java.version>
-        <pmdVersion>6.55.0</pmdVersion>
+        <pmdVersion>7.26.0</pmdVersion>
         <lombok.version>1.18.46</lombok.version>
         <junit.version>6.1.1</junit.version>
         <assertj.version>3.11.1</assertj.version>
