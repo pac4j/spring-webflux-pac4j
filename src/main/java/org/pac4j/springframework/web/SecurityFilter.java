@@ -10,6 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * <p>This filter protects an URL.</p>
@@ -61,24 +62,26 @@ public class SecurityFilter implements WebFilter, SecurityEndpoint {
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange serverWebExchange, @NonNull WebFilterChain webFilterChain) {
 
-        final SpringWebFluxFrameworkParameters frameworkParameters = new SpringWebFluxFrameworkParameters(serverWebExchange);
+        return serverWebExchange.getSession().then(Mono.defer(() -> {
+            final SpringWebFluxFrameworkParameters frameworkParameters = new SpringWebFluxFrameworkParameters(serverWebExchange);
 
-        final long t0 = System.currentTimeMillis();
-        try {
+            final long t0 = System.currentTimeMillis();
+            try {
 
-            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+                FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-            final Object result = config.getSecurityLogic().perform(config, (ctx, session, profiles) -> ACCESS_GRANTED, clients, authorizers, matchers, frameworkParameters);
-            if (result == ACCESS_GRANTED) {
-                return webFilterChain.filter(serverWebExchange);
+                final Object result = config.getSecurityLogic().perform(config, (ctx, session, profiles) -> ACCESS_GRANTED, clients, authorizers, matchers, frameworkParameters);
+                if (result == ACCESS_GRANTED) {
+                    return webFilterChain.filter(serverWebExchange);
+                }
+
+                return (Mono<Void>) result;
+
+            } finally {
+                final long t1 = System.currentTimeMillis();
+                trackTime(t0, t1);
             }
-
-            return (Mono<Void>) result;
-
-        } finally {
-            final long t1 = System.currentTimeMillis();
-            trackTime(t0, t1);
-        }
+        }).subscribeOn(Schedulers.boundedElastic()));
     }
 
     protected void trackTime(final long t0, final long t1) {

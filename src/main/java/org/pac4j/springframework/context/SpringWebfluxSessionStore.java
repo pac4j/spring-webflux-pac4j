@@ -112,7 +112,8 @@ public class SpringWebfluxSessionStore implements SessionStore {
         waitForSession();
 
         if (session != null) {
-            session.invalidate();
+            // SessionStore is synchronous; the WebFlux endpoints invoke it on a worker.
+            session.invalidate().block();
             subscribed = false;
             return true;
         }
@@ -127,7 +128,8 @@ public class SpringWebfluxSessionStore implements SessionStore {
         waitForSession();
 
         if (session != null) {
-            session.changeSessionId();
+            // Wait for the new identifier before the callback continues.
+            session.changeSessionId().block();
             subscribed = false;
             return true;
         }

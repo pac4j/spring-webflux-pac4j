@@ -6,17 +6,17 @@ import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
-import static org.pac4j.springframework.context.SpringWebfluxWebContext.SAML_BODY_ATTRIBUTE;
+import static org.pac4j.springframework.context.SpringWebfluxWebContext.REQUEST_BODY_ATTRIBUTE;
 
 /**
  * <p>This controller finishes the login process for an indirect client.</p>
@@ -43,30 +43,40 @@ public class CallbackController {
 
     private static long consumedTime = 0;
 
+    /**
+     * Processes the identity provider's callback, with or without a request body.
+     * Stores the raw body for clients that need it and loads the session before
+     * running the synchronous callback logic on a worker thread.
+     *
+     * @param serverWebExchange the callback request and response
+     * @return completion of callback processing and its response
+     */
     @RequestMapping("${pac4j.callback.path:/callback}")
     public Mono<Void> callback(final ServerWebExchange serverWebExchange) {
 
-        final SpringWebFluxFrameworkParameters frameworkParameters = new SpringWebFluxFrameworkParameters(serverWebExchange);
-
-        final long t0 = System.currentTimeMillis();
-        try {
-            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
-            return DataBufferUtils.join(serverWebExchange.getRequest().getBody())
-                    .map(DataBuffer::asByteBuffer)
-                    .map(ByteBuffer::array)
-                    .map(String::new).flatMap(s -> {
-                                // Include the request content in the attributes so that
-                                // downstream authentication mechanisms (e.g. SAML) can use
-                                // to extract authentication mechanism.
-                                serverWebExchange.getAttributes().put(SAML_BODY_ATTRIBUTE, s);
-                                return (Mono<Void>) config.getCallbackLogic().perform(config, this.defaultUrl, this.renewSession, this.defaultClient, frameworkParameters);
-                            }
-
-                    );
-        } finally {
-            final long t1 = System.currentTimeMillis();
-            trackTime(t0, t1);
-        }
+        return DataBufferUtils.join(serverWebExchange.getRequest().getBody())
+            .map(buffer -> {
+                try {
+                    return buffer.toString(StandardCharsets.UTF_8);
+                } finally {
+                    DataBufferUtils.release(buffer);
+                }
+            })
+            .defaultIfEmpty("")
+            .flatMap(content -> {
+                serverWebExchange.getAttributes().put(REQUEST_BODY_ATTRIBUTE, content);
+                return serverWebExchange.getSession().then(Mono.defer(() -> {
+                    final long t0 = System.currentTimeMillis();
+                    try {
+                        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+                        return (Mono<Void>) config.getCallbackLogic().perform(config, this.defaultUrl,
+                            this.renewSession, this.defaultClient,
+                            new SpringWebFluxFrameworkParameters(serverWebExchange));
+                    } finally {
+                        trackTime(t0, System.currentTimeMillis());
+                    }
+                }).subscribeOn(Schedulers.boundedElastic()));
+            });
     }
 
 
@@ -74,6 +84,14 @@ public class CallbackController {
         consumedTime += t1 - t0;
     }
 
+    /**
+     * Delegates callbacks whose URL includes a client-name path segment to
+     * {@link #callback(ServerWebExchange)}, preserving the original request path.
+     *
+     * @param serverWebExchange the callback request and response
+     * @param cn the client name captured from the callback path
+     * @return completion of callback processing and its response
+     */
     @RequestMapping("${pac4j.callback.path/{cn}:/callback/{cn}}")
     public Mono<Void> callbackWithClientName(final ServerWebExchange serverWebExchange, @PathVariable("cn") final String cn) {
 

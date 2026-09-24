@@ -20,7 +20,14 @@ import java.util.*;
  * @since 1.0.0
  */
 public class SpringWebfluxWebContext implements WebContext {
-    public static final String SAML_BODY_ATTRIBUTE = "PAC4J_REQUEST_CONTENT";
+    /** The exchange attribute containing the raw HTTP request body. */
+    public static final String REQUEST_BODY_ATTRIBUTE = "PAC4J_REQUEST_CONTENT";
+
+    /**
+     * @deprecated Use {@link #REQUEST_BODY_ATTRIBUTE} instead.
+     */
+    @Deprecated
+    public static final String SAML_BODY_ATTRIBUTE = REQUEST_BODY_ATTRIBUTE;
 
     private final ServerWebExchange exchange;
 
@@ -170,6 +177,6 @@ public class SpringWebfluxWebContext implements WebContext {
     @Override
     public  String getRequestContent() {
         final Map<String, Object> attributes = exchange.getAttributes();
-        return (String) attributes.get(SAML_BODY_ATTRIBUTE);
+        return (String) attributes.get(REQUEST_BODY_ATTRIBUTE);
     }
 }
