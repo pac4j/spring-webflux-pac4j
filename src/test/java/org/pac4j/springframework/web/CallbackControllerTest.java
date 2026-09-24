@@ -9,8 +9,8 @@ import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -31,7 +31,7 @@ public class CallbackControllerTest {
     @Value("${pac4j.callback.path:/callback}")
     private String callbackPath;
 
-    @Autowired
+    @MockitoBean
     public Config config;
 
     @Test
@@ -57,8 +57,6 @@ public class CallbackControllerTest {
 
     @SpringBootConfiguration
     public static class TestConfig {
-        @MockBean
-        public Config config;
         @Bean
         public CallbackController callbackController() {
             return new CallbackController();
