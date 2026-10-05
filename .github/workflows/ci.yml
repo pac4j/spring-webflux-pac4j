@@ -3,6 +3,8 @@ name: Java CI
 env:
   JDK_CURRENT: 17
   DISTRIBUTION: zulu
+  # PMD analyzes the same Java 17 platform used by Maven in both jobs.
+  PMD_JAVA_DISABLE_AUX_CLASSPATH_WARNINGS: 'true'
 
 on:
   push:

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="spring-webflux-pac4j"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.github.io/schema/ruleset_2_0_0.xsd">
+    <description>
+        Maven's default checks, with deprecated return-value rules replaced by
+        their successor in PMD 7.27 and later.
+    </description>
+    <rule ref="rulesets/java/maven-pmd-plugin-default.xml">
+        <exclude name="CheckSkipResult"/>
+        <exclude name="UselessPureMethodCall"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml/UnusedReturnValue"/>
+</ruleset>

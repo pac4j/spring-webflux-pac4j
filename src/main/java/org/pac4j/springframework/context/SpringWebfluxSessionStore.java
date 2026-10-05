@@ -1,5 +1,7 @@
 package org.pac4j.springframework.context;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -26,18 +28,28 @@ public class SpringWebfluxSessionStore implements SessionStore {
 
     private final ServerWebExchange exchange;
 
+    @Getter
     private WebSession session;
 
+    @Getter
     private boolean loaded;
     private boolean subscribed;
 
+    @Getter
+    @Setter
     private int timeout = 20;
 
+    @Getter
+    @Setter
     private int timeoutIncrement = 3;
 
+    @Getter
     private static long nbWaitCalls = 0;
+    @Getter
     private static long nbWaitInterruptions = 0;
+    @Getter
     private static long nbWaitErrors = 0;
+    @Getter
     private static long waitedTime = 0;
 
     public SpringWebfluxSessionStore(final ServerWebExchange exchange) {
@@ -169,45 +181,5 @@ public class SpringWebfluxSessionStore implements SessionStore {
     @Override
     public Optional<SessionStore> buildFromTrackableSession(final WebContext context, final Object trackableSession) {
         return Optional.empty();
-    }
-
-    public WebSession getSession() {
-        return session;
-    }
-
-    public boolean isLoaded() {
-        return loaded;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(final int timeout) {
-        this.timeout = timeout;
-    }
-
-    public int getTimeoutIncrement() {
-        return timeoutIncrement;
-    }
-
-    public void setTimeoutIncrement(final int timeoutIncrement) {
-        this.timeoutIncrement = timeoutIncrement;
-    }
-
-    public static long getNbWaitCalls() {
-        return nbWaitCalls;
-    }
-
-    public static long getNbWaitInterruptions() {
-        return nbWaitInterruptions;
-    }
-
-    public static long getNbWaitErrors() {
-        return nbWaitErrors;
-    }
-
-    public static long getWaitedTime() {
-        return waitedTime;
     }
 }

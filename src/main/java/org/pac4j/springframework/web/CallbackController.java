@@ -1,22 +1,20 @@
 package org.pac4j.springframework.web;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.springframework.context.SpringWebFluxFrameworkParameters;
+import org.pac4j.springframework.context.SpringWebfluxRequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-
-import java.nio.charset.StandardCharsets;
-
-import static org.pac4j.springframework.context.SpringWebfluxWebContext.REQUEST_BODY_ATTRIBUTE;
 
 /**
  * <p>This controller finishes the login process for an indirect client.</p>
@@ -25,9 +23,13 @@ import static org.pac4j.springframework.context.SpringWebfluxWebContext.REQUEST_
  * @since 1.0.0
  */
 @Controller
+@Getter
+@Setter
 public class CallbackController {
 
     private CallbackLogic callbackLogic;
+
+    private int maxBodySize = SpringWebfluxRequestBody.DEFAULT_MAX_BODY_SIZE;
 
     @Value("${pac4j.callback.defaultUrl:#{null}}")
     private String defaultUrl;
@@ -41,6 +43,7 @@ public class CallbackController {
     @Autowired
     private Config config;
 
+    @Getter
     private static long consumedTime = 0;
 
     /**
@@ -54,31 +57,20 @@ public class CallbackController {
     @RequestMapping("${pac4j.callback.path:/callback}")
     public Mono<Void> callback(final ServerWebExchange serverWebExchange) {
 
-        return DataBufferUtils.join(serverWebExchange.getRequest().getBody())
-            .map(buffer -> {
+        return SpringWebfluxRequestBody.prepare(serverWebExchange, maxBodySize)
+            .flatMap(exchange -> exchange.getSession().then(Mono.defer(() -> {
+                final long t0 = System.currentTimeMillis();
                 try {
-                    return buffer.toString(StandardCharsets.UTF_8);
+                    FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+                    final var logic = callbackLogic != null ? callbackLogic : config.getCallbackLogic();
+                    return (Mono<Void>) logic.perform(config, this.defaultUrl,
+                        this.renewSession, this.defaultClient,
+                        new SpringWebFluxFrameworkParameters(exchange));
                 } finally {
-                    DataBufferUtils.release(buffer);
+                    trackTime(t0, System.currentTimeMillis());
                 }
-            })
-            .defaultIfEmpty("")
-            .flatMap(content -> {
-                serverWebExchange.getAttributes().put(REQUEST_BODY_ATTRIBUTE, content);
-                return serverWebExchange.getSession().then(Mono.defer(() -> {
-                    final long t0 = System.currentTimeMillis();
-                    try {
-                        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
-                        return (Mono<Void>) config.getCallbackLogic().perform(config, this.defaultUrl,
-                            this.renewSession, this.defaultClient,
-                            new SpringWebFluxFrameworkParameters(serverWebExchange));
-                    } finally {
-                        trackTime(t0, System.currentTimeMillis());
-                    }
-                }).subscribeOn(Schedulers.boundedElastic()));
-            });
+            }).subscribeOn(Schedulers.boundedElastic())));
     }
-
 
     protected void trackTime(final long t0, final long t1) {
         consumedTime += t1 - t0;
@@ -98,47 +90,11 @@ public class CallbackController {
         return callback(serverWebExchange);
     }
 
-    public String getDefaultUrl() {
-        return defaultUrl;
-    }
-
-    public void setDefaultUrl(final String defaultUrl) {
-        this.defaultUrl = defaultUrl;
-    }
-
-    public CallbackLogic getCallbackLogic() {
-        return callbackLogic;
-    }
-
-    public void setCallbackLogic(final CallbackLogic callbackLogic) {
-        this.callbackLogic = callbackLogic;
-    }
-
-    public Boolean getRenewSession() {
-        return renewSession;
-    }
-
-    public void setRenewSession(final Boolean renewSession) {
-        this.renewSession = renewSession;
-    }
-
-    public String getDefaultClient() {
-        return defaultClient;
-    }
-
-    public void setDefaultClient(final String client) {
-        this.defaultClient = client;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(final Config config) {
-        this.config = config;
-    }
-
-    public static long getConsumedTime() {
-        return consumedTime;
+    @Value("${pac4j.callback.maxBodySize:262144}")
+    public void setMaxBodySize(final int maxBodySize) {
+        if (maxBodySize <= 0) {
+            throw new IllegalArgumentException("maxBodySize must be positive");
+        }
+        this.maxBodySize = maxBodySize;
     }
 }

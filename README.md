@@ -56,6 +56,44 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 ### 4) [Get the authenticated user profiles](https://github.com/pac4j/spring-webflux-pac4j/wiki/Get-the-authenticated-user-profiles)
 
 
+### Request bodies and proxies
+
+URL-encoded form parameters are available to pac4j alongside query parameters;
+query values take precedence when a name appears in both. The raw body remains
+available to authentication clients and downstream WebFlux handlers.
+
+The callback body and forms handled by the security filter or logout controller
+are limited to **262144 bytes (256 KiB)** by default. Larger requests receive HTTP
+413 before pac4j runs. Configure `pac4j.callback.maxBodySize` or
+`pac4j.logout.maxBodySize` (in bytes), or call `setMaxBodySize(int)` on the
+controller or `SecurityFilter`. When a form passes through several components,
+configure each component's limit as needed. These limits are independent of
+Spring's codec limits.
+
+Note that the security filter buffers and parses every URL-encoded form request it
+processes, even when the request does not target pac4j: applications accepting
+URL-encoded forms larger than 256 KiB on protected URLs must raise its limit.
+
+Behind a reverse proxy, enable forwarded header handling for your trusted proxy:
+with Spring Boot, set `server.forward-headers-strategy` to `framework` (Spring's
+`ForwardedHeaderTransformer`) or `native` (Reactor Netty). pac4j uses the
+resulting request URI for public host, port and HTTPS information.
+
+
+### Build
+
+Run the build with JDK 17, matching the CI and PMD target:
+
+```sh
+PMD_JAVA_DISABLE_AUX_CLASSPATH_WARNINGS=true mvn verify
+```
+
+The Maven PMD plugin supplies the project's dependencies, and PMD adds the
+platform classes from the JDK running Maven. With JDK 17, the platform matches
+the analysis target. The environment variable only disables PMD's auxiliary
+classpath diagnostics; rule checks and type resolution remain enabled.
+
+
 ## Demos
 
 Spring Webflux boot demo: [spring-webflux-pac4j-boot-demo](https://github.com/pac4j/spring-webflux-pac4j-boot-demo).

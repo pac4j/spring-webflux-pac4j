@@ -7,6 +7,8 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.net.InetAddress;
@@ -35,6 +37,8 @@ public class SpringWebfluxWebContext implements WebContext {
 
     private final ServerHttpResponse response;
 
+    private MultiValueMap<String, String> requestParameters;
+
     public SpringWebfluxWebContext(final ServerWebExchange exchange) {
         this.exchange = exchange;
         this.request = exchange.getRequest();
@@ -51,14 +55,27 @@ public class SpringWebfluxWebContext implements WebContext {
 
     @Override
     public Optional<String> getRequestParameter(final String name) {
-        return Optional.ofNullable(request.getQueryParams().getFirst(name));
+        return Optional.ofNullable(requestParameters().getFirst(name));
     }
 
     @Override
     public Map<String, String[]> getRequestParameters() {
         final Map<String, String[]> parameters = new HashMap<>();
-        request.getQueryParams().entrySet().forEach(entry -> parameters.put(entry.getKey(), entry.getValue().toArray(new String[0])));
+        requestParameters().entrySet().forEach(entry -> parameters.put(entry.getKey(), entry.getValue().toArray(new String[0])));
         return parameters;
+    }
+
+    private MultiValueMap<String, String> requestParameters() {
+        if (requestParameters == null) {
+            final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+            parameters.addAll(request.getQueryParams());
+            final MultiValueMap<String, String> form = exchange.getAttribute(SpringWebfluxRequestBody.FORM_PARAMETERS_ATTRIBUTE);
+            if (form != null) {
+                parameters.addAll(form);
+            }
+            requestParameters = parameters;
+        }
+        return requestParameters;
     }
 
     @Override
@@ -110,30 +127,27 @@ public class SpringWebfluxWebContext implements WebContext {
 
     @Override
     public String getServerName() {
-        final InetSocketAddress address = request.getLocalAddress();
-        if (address != null) {
-            return address.getHostName();
-        }
-        return null;
+        return request.getURI().getHost();
     }
 
     @Override
     public int getServerPort() {
-        final InetSocketAddress address = request.getLocalAddress();
-        if (address != null) {
-            return address.getPort();
+        final int port = request.getURI().getPort();
+        if (port != -1) {
+            return port;
         }
-        return -1;
+        return "https".equalsIgnoreCase(getScheme()) ? HttpConstants.DEFAULT_HTTPS_PORT : HttpConstants.DEFAULT_HTTP_PORT;
     }
 
     @Override
     public String getScheme() {
-        return isSecure() ? "https" : "http";
+        final String scheme = request.getURI().getScheme();
+        return scheme != null ? scheme : (request.getSslInfo() != null ? "https" : "http");
     }
 
     @Override
     public boolean isSecure() {
-        return request.getSslInfo() != null;
+        return "https".equalsIgnoreCase(getScheme());
     }
 
     @Override

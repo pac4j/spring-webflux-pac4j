@@ -55,6 +55,15 @@ public class CallbackControllerTest {
                 .isOk();
     }
 
+    @Test
+    void oversizedCallbackIsRejectedBeforeAuthentication() {
+        webClient.post().uri(callbackPath)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .bodyValue("x".repeat(1024 * 1024))
+            .exchange().expectStatus().isEqualTo(413);
+        Mockito.verify(config, Mockito.never()).getCallbackLogic();
+    }
+
     @SpringBootConfiguration
     public static class TestConfig {
         @Bean
