@@ -51,7 +51,18 @@ jobs:
           server-password: MAVEN_PASSWORD
           distribution: ${{ env.DISTRIBUTION }}
       - name: Deploy to Sonatype
-        run: mvn -B -DskipTests deploy
+        # releases are published locally with the maven-release-plugin: only deploy snapshots
+        run: |
+          VERSION=$(mvn -B -q org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate -Dexpression=project.version -DforceStdout)
+          if [[ -z "$VERSION" ]]; then
+            echo "Unable to determine the project version"
+            exit 1
+          fi
+          if [[ "$VERSION" != *-SNAPSHOT ]]; then
+            echo "Release version $VERSION: nothing to deploy"
+            exit 0
+          fi
+          mvn -B -DskipTests deploy
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USER }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PWD }}
