@@ -58,7 +58,7 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 
 ### Request bodies and proxies
 
-URL-encoded form parameters are available to pac4j alongside query parameters;
+Since version 3.0.2, URL-encoded form parameters are available to pac4j alongside query parameters;
 query values take precedence when a name appears in both. The raw body remains
 available to authentication clients and downstream WebFlux handlers.
 
@@ -78,6 +78,11 @@ Behind a reverse proxy, enable forwarded header handling for your trusted proxy:
 with Spring Boot, set `server.forward-headers-strategy` to `framework` (Spring's
 `ForwardedHeaderTransformer`) or `native` (Reactor Netty). pac4j uses the
 resulting request URI for public host, port and HTTPS information.
+
+See the [callback](https://github.com/pac4j/spring-webflux-pac4j/wiki/Callback-configuration),
+[logout](https://github.com/pac4j/spring-webflux-pac4j/wiki/Logout-configuration) and
+[security](https://github.com/pac4j/spring-webflux-pac4j/wiki/Apply-security) pages for details
+and the [migration guide](https://github.com/pac4j/spring-webflux-pac4j/wiki/Migration-guide) when upgrading from 3.0.1.
 
 
 ### Build
