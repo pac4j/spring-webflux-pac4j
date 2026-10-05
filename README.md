@@ -6,7 +6,7 @@
   <a href="https://central.sonatype.com/artifact/org.pac4j/spring-webflux-pac4j"><img src="https://img.shields.io/maven-central/v/org.pac4j/spring-webflux-pac4j?label=Maven%20Central" alt="Maven Central" /></a>
   <a href="https://github.com/pac4j/spring-webflux-pac4j/actions/workflows/ci.yml"><img src="https://github.com/pac4j/spring-webflux-pac4j/actions/workflows/ci.yml/badge.svg" alt="Build status" /></a>
   <img src="https://img.shields.io/badge/Java-17%2B-blue" alt="Java 17+" />
-  <img src="https://img.shields.io/badge/Spring%20WebFlux-6.x%20%7C%207.x-blue" alt="Spring WebFlux 6.x | 7.x" />
+  <img src="https://img.shields.io/badge/Spring%20WebFlux-6.x%2B-blue" alt="Spring WebFlux 6.x+" />
   <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2 license" /></a>
 </p>
 
@@ -18,8 +18,7 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 
 | spring-webflux-pac4j | JDK | pac4j | Spring |
 |----------------------|-----|-------|--------|
-| version >= 3.0.2     | 17  | v6    | v6, v7 |
-| version >= 3         | 17  | v6    | v6     |
+| version >= 3         | 17  | v6    | v6 \| v7 |
 | version >= 2         | 17  | v5    | v6     |
 | version >= 1         | 11  | v5    | v5     |
 
@@ -98,9 +97,6 @@ The Maven PMD plugin supplies the project's dependencies, and PMD adds the
 platform classes from the JDK running Maven. With JDK 17, the platform matches
 the analysis target. The environment variable only disables PMD's auxiliary
 classpath diagnostics; rule checks and type resolution remain enabled.
-
-The build uses Spring 7 / Spring Boot 4 by default. To run it against Spring 6.2 /
-Spring Boot 3.5, as the CI does too, add `-Dspring6`.
 
 
 ## Demos
