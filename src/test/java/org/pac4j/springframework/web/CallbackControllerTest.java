@@ -9,7 +9,6 @@ import org.pac4j.springframework.context.SpringWebfluxWebContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -21,7 +20,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(SpringExtension.class)
-@WebFluxTest(controllers = CallbackController.class)
+@WebFluxSliceTest(controllers = CallbackController.class)
 @Import(CallbackControllerTest.TestConfig.class)
 public class CallbackControllerTest {
 

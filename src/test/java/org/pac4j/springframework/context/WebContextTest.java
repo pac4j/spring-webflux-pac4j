@@ -21,7 +21,7 @@ class WebContextTest {
             .header("X-Forwarded-Proto", "https")
             .header("X-Forwarded-Host", "public.example")
             .header("X-Forwarded-Port", "443").build();
-        final var transformed = new ForwardedHeaderTransformer(false).apply(request);
+        final var transformed = new ForwardedHeaderTransformer().apply(request);
         final var exchange = MockServerWebExchange.from(request).mutate().request(transformed).build();
         final var context = new SpringWebfluxWebContext(exchange);
 
@@ -51,13 +51,13 @@ class WebContextTest {
 
     @Test
     void securityFollowsPublicSchemeRatherThanInternalTlsConnection() {
-        final var request = MockServerHttpRequest.get("https://internal.example:8443/protected")
-            .sslInfo(Mockito.mock(SslInfo.class))
+        final var mockRequest = MockServerHttpRequest.get("https://internal.example:8443/protected")
             .header("X-Forwarded-Proto", "http")
             .header("X-Forwarded-Host", "public.example")
             .header("X-Forwarded-Port", "80").build();
-        final var transformed = new ForwardedHeaderTransformer(false).apply(request);
-        final var exchange = MockServerWebExchange.from(request).mutate().request(transformed).build();
+        final var request = mockRequest.mutate().sslInfo(Mockito.mock(SslInfo.class)).build();
+        final var transformed = new ForwardedHeaderTransformer().apply(request);
+        final var exchange = MockServerWebExchange.from(mockRequest).mutate().request(transformed).build();
         final var context = new SpringWebfluxWebContext(exchange);
 
         assertNotNull(exchange.getRequest().getSslInfo());
